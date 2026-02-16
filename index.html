@@ -1,1163 +1,964 @@
 
-# Создаём новый index.html с современным дизайном
-html_v2 = '''<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Бункер - Игра на выживание</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f0f0f">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #141414;
-            --bg-card: #1a1a1a;
-            --bg-hover: #242424;
-            --accent: #ff3d3d;
-            --accent-hover: #ff5252;
-            --accent-glow: rgba(255, 61, 61, 0.3);
-            --text-primary: #ffffff;
-            --text-secondary: #a0a0a0;
-            --text-muted: #666666;
-            --border: #2a2a2a;
-            --success: #22c55e;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --info: #3b82f6;
-            --gradient-1: linear-gradient(135deg, #ff3d3d 0%, #ff6b6b 100%);
-            --gradient-2: linear-gradient(135deg, #1a1a1a 0%, #242424 100%);
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
-            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
-            --shadow-glow: 0 0 40px rgba(255, 61, 61, 0.15);
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        /* Animated background */
-        .bg-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
-        }
-
-        .bg-animation::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(255, 61, 61, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 61, 61, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.03) 0%, transparent 30%);
-            animation: bgMove 20s ease-in-out infinite;
-        }
-
-        @keyframes bgMove {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(2%, 2%) rotate(1deg); }
-            66% { transform: translate(-1%, 1%) rotate(-1deg); }
-        }
-
-        /* Grid overlay */
-        .grid-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Container */
-        .container {
-            position: relative;
-            z-index: 2;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 24px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            padding: 40px 0;
-        }
-
-        .logo {
-            font-size: clamp(3rem, 8vw, 5rem);
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            position: relative;
-            display: inline-block;
-        }
-
-        .logo::after {
-            content: 'БУНКЕР';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: blur(20px);
-            opacity: 0.5;
-            animation: pulse 3s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.02); }
-        }
-
-        .subtitle {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-top: 8px;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            font-weight: 500;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            box-shadow: var(--shadow-lg);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .card:hover {
-            border-color: rgba(255, 61, 61, 0.3);
-            box-shadow: var(--shadow-glow);
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 14px 28px;
-            font-family: inherit;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 61, 61, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 61, 61, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border);
-            border-color: var(--text-muted);
-        }
-
-        .btn-large {
-            padding: 18px 40px;
-            font-size: 1.1rem;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        /* Form elements */
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 14px 18px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.2s;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(255, 61, 61, 0.1);
-        }
-
-        .form-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        /* Screens */
-        .screen {
-            display: none;
-            animation: fadeIn 0.4s ease;
-            flex: 1;
-        }
-
-        .screen.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Main Menu */
-        .menu-container {
-            max-width: 480px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .menu-description {
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-            line-height: 1.8;
-            font-size: 1.05rem;
-        }
-
-        .menu-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Room Code Display */
-        .code-display {
-            background: var(--bg-secondary);
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            text-align: center;
-            margin: 24px 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .code-display::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: var(--gradient-1);
-            opacity: 0.5;
-        }
-
-        .code-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-            margin-bottom: 12px;
-        }
-
-        .code-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--accent);
-            letter-spacing: 0.2em;
-            user-select: all;
-            cursor: pointer;
-        }
-
-        /* Players Grid */
-        .players-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 16px;
-            margin: 24px 0;
-        }
-
-        .player-item {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px 16px;
-            text-align: center;
-            transition: all 0.2s;
-        }
-
-        .player-item:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .player-item.host {
-            border-color: var(--warning);
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), var(--bg-secondary));
-        }
-
-        .player-item.current {
-            border-color: var(--success);
-            box-shadow: 0 0 0 1px var(--success);
-        }
-
-        .player-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            margin: 0 auto 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: 700;
-            background: var(--gradient-2);
-            border: 2px solid var(--border);
-        }
-
-        .player-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-bottom: 4px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .player-status {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .player-status.ready {
-            color: var(--success);
-        }
-
-        /* Game Cards */
-        .game-cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin: 24px 0;
-        }
-
-        .game-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            position: relative;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .game-card:hover {
-            border-color: rgba(255, 61, 61, 0.3);
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .game-card.revealed {
-            border-color: var(--success);
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), var(--bg-card));
-        }
-
-        .game-card.hidden {
-            background: var(--bg-secondary);
-        }
-
-        .game-card.hidden .card-content {
-            filter: blur(8px);
-            opacity: 0;
-            user-select: none;
-        }
-
-        .card-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: rgba(255, 61, 61, 0.1);
-            border: 1px solid rgba(255, 61, 61, 0.2);
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--accent);
-            margin-bottom: 16px;
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .card-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            line-height: 1.6;
-        }
-
-        .card-secret {
-            margin-top: 16px;
-            padding: 12px;
-            background: rgba(255, 61, 61, 0.08);
-            border-left: 3px solid var(--accent);
-            border-radius: 0 8px 8px 0;
-            font-size: 0.9rem;
-            color: var(--accent-hover);
-        }
-
-        /* Timer */
-        .timer-wrapper {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            z-index: 100;
-        }
-
-        .timer {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 50%;
-            width: 80px;
-            height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .timer.warning {
-            color: var(--warning);
-            border-color: var(--warning);
-            animation: pulse 1s infinite;
-        }
-
-        .timer.danger {
-            color: var(--danger);
-            border-color: var(--danger);
-            animation: pulse 0.5s infinite;
-        }
-
-        /* Phase Badge */
-        .phase-badge {
-            position: fixed;
-            top: 24px;
-            left: 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px 20px;
-            z-index: 100;
-        }
-
-        .phase-label {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 4px;
-        }
-
-        .phase-value {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        /* Voting */
-        .voting-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 16px;
-            margin: 24px 0;
-        }
-
-        .vote-card {
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .vote-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-
-        .vote-card.selected {
-            border-color: var(--success);
-            background: rgba(34, 197, 94, 0.05);
-        }
-
-        .vote-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background: var(--accent);
-            border-radius: 0 0 0 16px;
-            transition: width 0.5s ease;
-        }
-
-        /* Chat */
-        .chat-container {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 360px;
-            max-height: 450px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            z-index: 50;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
-        .chat-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--bg-secondary);
-        }
-
-        .chat-title {
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-            max-height: 280px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .chat-message {
-            padding: 12px 16px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            font-size: 0.9rem;
-        }
-
-        .chat-message .author {
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 4px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .chat-input-wrapper {
-            display: flex;
-            gap: 8px;
-            padding: 16px;
-            border-top: 1px solid var(--border);
-            background: var(--bg-secondary);
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 10px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.9rem;
-        }
-
-        .chat-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
-        .chat-send {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background: var(--accent);
-            border: none;
-            color: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
-        }
-
-        .chat-send:hover {
-            background: var(--accent-hover);
-            transform: scale(1.05);
-        }
-
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 24px;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px;
-            max-width: 480px;
-            width: 100%;
-            text-align: center;
-            animation: modalIn 0.3s ease;
-            box-shadow: var(--shadow-glow);
-        }
-
-        @keyframes modalIn {
-            from { opacity: 0; transform: scale(0.95) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-
-        .modal-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 50%;
-            background: rgba(255, 61, 61, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 24px;
-            font-size: 2rem;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-        }
-
-        .modal-text {
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-            line-height: 1.6;
-        }
-
-        /* Loading */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            gap: 24px;
-        }
-
-        .spinner {
-            width: 60px;
-            height: 60px;
-            border: 3px solid var(--border);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            letter-spacing: 0.2em;
-            animation: blink 1.5s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Status indicators */
-        .status-bar {
-            position: fixed;
-            bottom: 24px;
-            left: 24px;
-            display: flex;
-            gap: 12px;
-            z-index: 100;
-        }
-
-        .status-pill {
-            padding: 8px 16px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .status-pill::before {
-            content: '';
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-
-        .status-pill.online::before { background: var(--success); box-shadow: 0 0 8px var(--success); }
-        .status-pill.offline::before { background: var(--danger); }
-        .status-pill.connecting::before { background: var(--warning); animation: pulse 1s infinite; }
-
-        /* Utility */
-        .text-center { text-align: center; }
-        .mt-8 { margin-top: 8px; }
-        .mt-16 { margin-top: 16px; }
-        .mt-24 { margin-top: 24px; }
-        .mb-16 { margin-bottom: 16px; }
-        .hidden { display: none !important; }
-
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-center { justify-content: center; }
-        .gap-12 { gap: 12px; }
-        .gap-16 { gap: 16px; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 16px;
-            }
-
-            .card {
-                padding: 24px;
-            }
-
-            .game-cards-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .players-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .chat-container {
-                width: calc(100% - 32px);
-                right: 16px;
-                bottom: 16px;
-            }
-
-            .timer-wrapper {
-                top: 16px;
-                right: 16px;
-            }
-
-            .timer {
-                width: 60px;
-                height: 60px;
-                font-size: 1.25rem;
-            }
-
-            .phase-badge {
-                top: 16px;
-                left: 16px;
-                padding: 12px 16px;
-            }
-
-            .code-value {
-                font-size: 2rem;
+# Создаём новый app.js без Firebase, с WebRTC + Base64
+app_js_free = '''// Bunker Game - P2P версия без сервера (WebRTC + Base64)
+class BunkerGame {
+    constructor() {
+        this.roomId = null;
+        this.playerId = null;
+        this.playerName = '';
+        this.isHost = false;
+        this.gameState = null;
+        this.players = {};
+        this.connections = {};
+        this.peer = null;
+        this.timerInterval = null;
+        this.selectedVote = null;
+        
+        // PeerJS конфиг (бесплатные серверы)
+        this.peerConfig = {
+            host: 'peerjs.mirotalk.net',
+            port: 443,
+            secure: true,
+            debug: 1
+        };
+        
+        this.init();
+    }
+
+    init() {
+        this.checkURLParams();
+        this.setupEventListeners();
+        
+        setTimeout(() => {
+            document.getElementById('loadingScreen').style.display = 'none';
+        }, 1000);
+    }
+
+    checkURLParams() {
+        const params = new URLSearchParams(window.location.search);
+        const room = params.get('room');
+        const data = params.get('data');
+        
+        if (room && data) {
+            // Присоединение по ссылке
+            try {
+                const decoded = JSON.parse(atob(decodeURIComponent(data)));
+                this.joinByLink(room, decoded);
+            } catch(e) {
+                console.error('Invalid link');
             }
         }
+    }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+    setupEventListeners() {
+        document.getElementById('createPlayerName')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.createGame();
+        });
+        
+        document.getElementById('roomCodeInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.joinGame();
+        });
+
+        document.getElementById('chatInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.sendMessage();
+        });
+
+        document.getElementById('roomCodeInput')?.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+        });
+    }
+
+    generateRoomCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = '';
+        for (let i = 0; i < 4; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return code;
+    }
+
+    generatePlayerId() {
+        return 'p_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    async createGame() {
+        const name = document.getElementById('createPlayerName').value.trim();
+        const maxPlayers = parseInt(document.getElementById('maxPlayers').value);
+
+        if (!name) {
+            this.showModal('Ошибка', 'Введите ваше имя');
+            return;
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-            border-radius: 4px;
-        }
+        this.playerName = name;
+        this.playerId = this.generatePlayerId();
+        this.isHost = true;
+        this.roomId = this.generateRoomCode();
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
-        }
-    </style>
-</head>
-<body>
-    <div class="bg-animation"></div>
-    <div class="grid-overlay"></div>
-
-    <div class="loading-screen" id="loadingScreen">
-        <div class="spinner"></div>
-        <div class="loading-text">ИНИЦИАЛИЗАЦИЯ...</div>
-    </div>
-
-    <div class="status-bar">
-        <div class="status-pill offline" id="connectionStatus">
-            <span>Офлайн</span>
-        </div>
-    </div>
-
-    <div class="container">
-        <header class="header">
-            <h1 class="logo">БУНКЕР</h1>
-            <p class="subtitle">Апокалиптическая игра на выживание</p>
-        </header>
-
-        <!-- Main Menu -->
-        <div class="screen active" id="mainMenu">
-            <div class="menu-container">
-                <p class="menu-description">
-                    Катастрофа наступила. Цивилизация пала. Только бункер может спасти вас. 
-                    Но мест ограничено — убедите других, что вы достойны выжить.
-                </p>
-                <div class="menu-buttons">
-                    <button class="btn btn-primary btn-large" onclick="showScreen('createRoom')">
-                        <span>🎮</span> Создать игру
-                    </button>
-                    <button class="btn btn-secondary btn-large" onclick="showScreen('joinRoom')">
-                        <span>🔗</span> Присоединиться
-                    </button>
-                    <button class="btn btn-secondary" onclick="showRules()">
-                        <span>📖</span> Правила
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Create Room -->
-        <div class="screen" id="createRoom">
-            <div class="card" style="max-width: 440px; margin: 0 auto;">
-                <div class="text-center mb-16">
-                    <h2 style="font-size: 1.5rem; font-weight: 700;">Создание игры</h2>
-                    <p style="color: var(--text-secondary); margin-top: 8px;">Настройте параметры комнаты</p>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Ваше имя</label>
-                    <input type="text" class="form-input" id="createPlayerName" placeholder="Введите имя" maxlength="20">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Максимум игроков</label>
-                    <input type="number" class="form-input" id="maxPlayers" value="6" min="3" max="10">
-                </div>
-
-                <div class="flex flex-col gap-12 mt-24">
-                    <button class="btn btn-primary btn-full" onclick="createGame()">
-                        Создать комнату
-                    </button>
-                    <button class="btn btn-secondary btn-full" onclick="showScreen('mainMenu')">
-                        Назад
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Join Room -->
-        <div class="screen" id="joinRoom">
-            <div class="card" style="max-width: 440px; margin: 0 auto;">
-                <div class="text-center mb-16">
-                    <h2 style="font-size: 1.5rem; font-weight: 700;">Присоединиться</h2>
-                    <p style="color: var(--text-secondary); margin-top: 8px;">Введите код комнаты</p>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Ваше имя</label>
-                    <input type="text" class="form-input" id="joinPlayerName" placeholder="Введите имя" maxlength="20">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Код комнаты</label>
-                    <input type="text" class="form-input" id="roomCodeInput" placeholder="XXXX" maxlength="4" 
-                           style="text-transform: uppercase; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; letter-spacing: 0.5em;">
-                </div>
-
-                <div class="flex flex-col gap-12 mt-24">
-                    <button class="btn btn-primary btn-full" onclick="joinGame()">
-                        Войти в комнату
-                    </button>
-                    <button class="btn btn-secondary btn-full" onclick="showScreen('mainMenu')">
-                        Назад
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Lobby -->
-        <div class="screen" id="lobby">
-            <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-                <h2 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 8px;">Лобби</h2>
-                <p style="color: var(--text-secondary);">Ожидание игроков...</p>
-
-                <div class="code-display">
-                    <div class="code-label">Код комнаты</div>
-                    <div class="code-value" id="displayRoomCode">----</div>
-                </div>
-
-                <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg-secondary); border-radius: 20px; margin-bottom: 24px;">
-                    <span style="color: var(--text-muted);">Игроков:</span>
-                    <span id="playerCountBadge" style="font-weight: 700; color: var(--accent);">1 / 6</span>
-                </div>
-
-                <div class="players-grid" id="lobbyPlayers"></div>
-
-                <div id="hostControls" style="margin-top: 32px;">
-                    <button class="btn btn-primary btn-large" onclick="startGame()" id="startGameBtn" disabled>
-                        Начать игру
-                    </button>
-                    <p style="color: var(--text-muted); margin-top: 12px; font-size: 0.875rem;">Нужно минимум 3 игрока</p>
-                </div>
-
-                <button class="btn btn-secondary mt-24" onclick="leaveRoom()" style="border-color: var(--danger); color: var(--danger);">
-                    Покинуть комнату
-                </button>
-            </div>
-        </div>
-
-        <!-- Game Screen -->
-        <div class="screen" id="gameScreen">
-            <div class="phase-badge">
-                <div class="phase-label">Фаза</div>
-                <div class="phase-value" id="currentPhase">Подготовка</div>
-            </div>
-
-            <div class="timer-wrapper" id="timerContainer" style="display: none;">
-                <div class="timer" id="gameTimer">03:00</div>
-            </div>
-
-            <div style="max-width: 1000px; margin: 80px auto 0;">
-                <div class="text-center mb-24">
-                    <div style="display: inline-flex; align-items: center; gap: 12px; padding: 8px 20px; background: var(--bg-secondary); border-radius: 20px; margin-bottom: 16px;">
-                        <span style="color: var(--text-muted);">Раунд</span>
-                        <span id="roundNumber" style="font-weight: 700; color: var(--accent);">1</span>
-                    </div>
-                    <h2 style="font-size: 1.5rem; font-weight: 700;" id="roundDescription">Открытие профессий</h2>
-                </div>
-
-                <div class="game-cards-grid" id="playerCards"></div>
-
-                <div id="otherPlayers" style="margin-top: 40px;">
-                    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; text-align: center;">Другие игроки</h3>
-                    <div class="players-grid" id="otherPlayersGrid"></div>
-                </div>
-
-                <div id="votingSection" style="display: none; margin-top: 40px;">
-                    <div class="text-center mb-24">
-                        <h3 style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">Голосование</h3>
-                        <p style="color: var(--text-secondary); margin-top: 8px;">Выберите, кто не достоин места в бункере</p>
-                    </div>
-                    <div class="voting-grid" id="votingGrid"></div>
-                    <div class="text-center mt-24">
-                        <button class="btn btn-primary btn-large" onclick="submitVote()" id="submitVoteBtn">Проголосовать</button>
-                    </div>
-                </div>
-
-                <div class="text-center mt-24" id="actionButtons">
-                    <button class="btn btn-primary" onclick="revealCard()" id="revealBtn" style="display: none;">Открыть карточку</button>
-                    <button class="btn btn-success" onclick="readyForNext()" id="readyBtn" style="display: none; background: var(--success);">Готов</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results -->
-        <div class="screen" id="resultsScreen">
-            <div class="text-center" style="max-width: 700px; margin: 0 auto; padding: 40px 0;">
-                <h2 style="font-size: 2rem; font-weight: 800; margin-bottom: 8px; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Игра окончена</h2>
-                <p style="color: var(--text-secondary);">Результаты выживания</p>
-
-                <div id="resultsContent" style="margin-top: 40px;"></div>
-
-                <button class="btn btn-primary btn-large mt-24" onclick="returnToMenu()">В главное меню</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat -->
-    <div class="chat-container" id="chatContainer" style="display: none;">
-        <div class="chat-header">
-            <span class="chat-title">💬 Чат комнаты</span>
-            <span style="cursor: pointer; color: var(--text-muted);" onclick="toggleChat()">−</span>
-        </div>
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input-wrapper">
-            <input type="text" class="chat-input" id="chatInput" placeholder="Написать сообщение..." maxlength="200">
-            <button class="chat-send" onclick="sendMessage()">➤</button>
-        </div>
-    </div>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal">
-        <div class="modal">
-            <div class="modal-icon">⚠️</div>
-            <h3 class="modal-title" id="modalTitle">Заголовок</h3>
-            <p class="modal-text" id="modalText">Текст сообщения</p>
-            <button class="btn btn-primary" onclick="closeModal()">Понятно</button>
-        </div>
-    </div>
-
-    <!-- Rules Modal -->
-    <div class="modal-overlay" id="rulesModal">
-        <div class="modal" style="max-width: 640px; text-align: left;">
-            <div class="text-center" style="margin-bottom: 24px;">
-                <div class="modal-icon" style="margin: 0 auto 16px;">📖</div>
-                <h3 class="modal-title">Правила игры</h3>
-            </div>
+        // Инициализация PeerJS как хост
+        this.peer = new Peer(this.roomId, this.peerConfig);
+        
+        this.peer.on('open', (id) => {
+            console.log('Host peer opened:', id);
             
-            <div style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
-                <p style="margin-bottom: 16px;"><strong style="color: var(--text-primary);">Цель:</strong> Убедить других, что вы достойны места в бункере после апокалипсиса.</p>
+            this.players[this.playerId] = {
+                id: this.playerId,
+                name: name,
+                isHost: true,
+                isReady: false,
+                avatar: this.generateAvatar(name),
+                isAlive: true
+            };
+
+            this.gameState = {
+                code: this.roomId,
+                host: this.playerId,
+                maxPlayers: maxPlayers,
+                status: 'lobby',
+                players: this.players,
+                messages: []
+            };
+
+            this.showScreen('lobby');
+            document.getElementById('displayRoomCode').textContent = this.roomId;
+            document.getElementById('hostControls').style.display = 'block';
+            this.updatePlayerCount(1, maxPlayers);
+            this.updateLobby();
+
+            // Генерируем ссылку для приглашения
+            this.generateInviteLink();
+        });
+
+        this.peer.on('connection', (conn) => {
+            console.log('Player connected:', conn.peer);
+            
+            conn.on('open', () => {
+                this.connections[conn.peer] = conn;
                 
-                <p style="margin-bottom: 12px; color: var(--text-primary); font-weight: 600;">Как играть:</p>
-                <ol style="margin-left: 20px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px;">
-                    <li>Получите случайного персонажа с характеристиками</li>
-                    <li>По раундам открывайте карты (профессия → здоровье → хобби...)</li>
-                    <li>Обсуждайте, кто полезен для выживания</li>
-                    <li>Голосуйте за исключение одного игрока за раунд</li>
-                    <li>Последние 2-3 выживших побеждают!</li>
-                </ol>
+                conn.on('data', (data) => {
+                    this.handleData(conn.peer, data);
+                });
 
-                <p style="margin-bottom: 12px; color: var(--text-primary); font-weight: 600;">Характеристики:</p>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px;">
-                    <div>⚕️ Профессия</div>
-                    <div>💪 Здоровье</div>
-                    <div>🎯 Хобби</div>
-                    <div>🧬 Биология</div>
-                    <div>🧠 Характер</div>
-                    <div>🎒 Багаж</div>
-                    <div>✨ Способность</div>
-                    <div>🔒 Секрет</div>
+                // Отправляем текущее состояние новому игроку
+                conn.send({
+                    type: 'init',
+                    gameState: this.gameState
+                });
+            });
+
+            conn.on('close', () => {
+                this.handleDisconnect(conn.peer);
+            });
+        });
+
+        this.peer.on('error', (err) => {
+            console.error('Peer error:', err);
+            this.showModal('Ошибка', 'Не удалось создать комнату: ' + err.message);
+        });
+    }
+
+    async joinGame() {
+        const name = document.getElementById('joinPlayerName').value.trim();
+        const code = document.getElementById('roomCodeInput').value.toUpperCase();
+
+        if (!name) {
+            this.showModal('Ошибка', 'Введите ваше имя');
+            return;
+        }
+
+        if (code.length !== 4) {
+            this.showModal('Ошибка', 'Введите 4-символьный код комнаты');
+            return;
+        }
+
+        this.playerName = name;
+        this.playerId = this.generatePlayerId();
+        this.roomId = code;
+        this.isHost = false;
+
+        // Подключаемся к хосту
+        this.peer = new Peer(this.generatePlayerId(), this.peerConfig);
+        
+        this.peer.on('open', () => {
+            const conn = this.peer.connect(code, {
+                reliable: true
+            });
+
+            conn.on('open', () => {
+                console.log('Connected to host');
+                this.connections['host'] = conn;
+                
+                // Отправляем информацию о себе
+                conn.send({
+                    type: 'join',
+                    player: {
+                        id: this.playerId,
+                        name: name,
+                        isHost: false,
+                        isReady: false,
+                        avatar: this.generateAvatar(name),
+                        isAlive: true
+                    }
+                });
+            });
+
+            conn.on('data', (data) => {
+                this.handleData('host', data);
+            });
+
+            conn.on('close', () => {
+                this.showModal('Соединение потеряно', 'Хост отключился');
+                this.returnToMenu();
+            });
+
+            conn.on('error', (err) => {
+                console.error('Connection error:', err);
+                this.showModal('Ошибка', 'Не удалось подключиться к комнате');
+            });
+        });
+
+        this.peer.on('error', (err) => {
+            console.error('Peer error:', err);
+            this.showModal('Ошибка', 'Комната не найдена или хост offline');
+        });
+    }
+
+    joinByLink(roomId, data) {
+        // Автозаполнение из ссылки
+        document.getElementById('joinPlayerName').value = '';
+        document.getElementById('roomCodeInput').value = roomId;
+        this.showScreen('joinRoom');
+        this.showModal('Приглашение', 'Введите ваше имя и нажмите "Войти в комнату"');
+    }
+
+    handleData(fromId, data) {
+        console.log('Received:', data);
+
+        switch(data.type) {
+            case 'init':
+                // Получаем начальное состояние от хоста
+                this.gameState = data.gameState;
+                this.players = data.gameState.players;
+                this.showScreen('lobby');
+                document.getElementById('displayRoomCode').textContent = this.gameState.code;
+                document.getElementById('hostControls').style.display = 'none';
+                this.updateLobby();
+                break;
+
+            case 'join':
+                // Хост получает нового игрока
+                if (this.isHost) {
+                    this.players[data.player.id] = data.player;
+                    this.gameState.players = this.players;
+                    this.broadcast({
+                        type: 'update',
+                        gameState: this.gameState
+                    });
+                    this.updateLobby();
+                }
+                break;
+
+            case 'update':
+                // Обновление состояния
+                this.gameState = data.gameState;
+                this.players = data.gameState.players;
+                if (this.currentScreen === 'lobby') {
+                    this.updateLobby();
+                } else if (this.currentScreen === 'gameScreen') {
+                    this.handleGameUpdate();
+                }
+                break;
+
+            case 'start':
+                // Игра началась
+                this.gameState = data.gameState;
+                this.showScreen('gameScreen');
+                document.getElementById('chatContainer').style.display = 'flex';
+                this.handleGameUpdate();
+                break;
+
+            case 'message':
+                // Новое сообщение в чате
+                this.displayMessage(data.message);
+                break;
+
+            case 'reveal':
+                // Игрок открыл карту
+                if (!this.isHost) {
+                    this.gameState.revealedCards = data.revealedCards;
+                    this.handleGameUpdate();
+                }
+                break;
+
+            case 'vote':
+                // Голос
+                if (this.isHost) {
+                    if (!this.gameState.votes) this.gameState.votes = {};
+                    this.gameState.votes[data.playerId] = data.vote;
+                    this.checkAllVoted();
+                }
+                break;
+        }
+    }
+
+    broadcast(data) {
+        Object.values(this.connections).forEach(conn => {
+            if (conn.open) {
+                conn.send(data);
+            }
+        });
+    }
+
+    handleDisconnect(playerId) {
+        if (this.isHost && this.players[playerId]) {
+            delete this.players[playerId];
+            delete this.connections[playerId];
+            this.gameState.players = this.players;
+            this.broadcast({
+                type: 'update',
+                gameState: this.gameState
+            });
+            this.updateLobby();
+        }
+    }
+
+    generateInviteLink() {
+        const data = encodeURIComponent(btoa(JSON.stringify({host: true})));
+        const link = `${window.location.origin}${window.location.pathname}?room=${this.roomId}&data=${data}`;
+        console.log('Invite link:', link);
+        // Можно добавить кнопку "Копировать ссылку"
+    }
+
+    updateLobby() {
+        const playerList = Object.values(this.players);
+        const container = document.getElementById('lobbyPlayers');
+        
+        container.innerHTML = playerList.map(player => `
+            <div class="player-item ${player.isHost ? 'host' : ''} ${player.id === this.playerId ? 'current' : ''}">
+                <div class="player-avatar" style="background: ${player.avatar.color};">
+                    ${player.avatar.letter}
                 </div>
-
-                <div style="padding: 16px; background: rgba(255, 61, 61, 0.05); border-radius: 12px; border: 1px solid rgba(255, 61, 61, 0.1);">
-                    <strong style="color: var(--accent);">💡 Совет:</strong> Думайте стратегически — иногда лучше скрыть негативную черту, а иногда открыть её первым и объяснить, почему она полезна!
+                <div class="player-name">${player.name}</div>
+                <div class="player-status ${player.isReady ? 'ready' : ''}">
+                    ${player.isHost ? '👑 ХОСТ' : player.isReady ? '✓ ГОТОВ' : 'ОЖИДАНИЕ'}
                 </div>
             </div>
+        `).join('');
 
-            <div class="text-center mt-24">
-                <button class="btn btn-primary" onclick="closeRules()">Понятно</button>
+        this.updatePlayerCount(playerList.length, this.gameState.maxPlayers);
+
+        if (this.isHost) {
+            const canStart = playerList.length >= 2;
+            const btn = document.getElementById('startGameBtn');
+            btn.disabled = !canStart;
+            btn.style.opacity = canStart ? '1' : '0.5';
+        }
+    }
+
+    updatePlayerCount(current, max) {
+        document.getElementById('playerCountBadge').textContent = `${current} / ${max}`;
+    }
+
+    generateAvatar(name) {
+        const colors = [
+            '#ff3d3d', '#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6',
+            '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
+        ];
+        return {
+            letter: name.charAt(0).toUpperCase(),
+            color: colors[Math.floor(Math.random() * colors.length)]
+        };
+    }
+
+    startGame() {
+        const playerList = Object.values(this.players);
+        if (playerList.length < 2) {
+            this.showModal('Ошибка', 'Нужно минимум 2 игрока');
+            return;
+        }
+
+        // Генерируем карты для всех
+        const cards = {};
+        playerList.forEach(player => {
+            cards[player.id] = this.generateCards();
+        });
+
+        this.gameState = {
+            ...this.gameState,
+            status: 'playing',
+            round: 1,
+            phase: 'reveal',
+            cards: cards,
+            revealedCards: {},
+            votes: {},
+            eliminated: {},
+            messages: []
+        };
+
+        this.broadcast({
+            type: 'start',
+            gameState: this.gameState
+        });
+
+        this.showScreen('gameScreen');
+        document.getElementById('chatContainer').style.display = 'flex';
+        this.handleGameUpdate();
+    }
+
+    generateCards() {
+        const professions = [
+            { title: 'Врач', desc: 'Может лечить болезни', icon: '⚕️' },
+            { title: 'Инженер', desc: 'Разбирается в механике', icon: '🔧' },
+            { title: 'Фермер', desc: 'Умеет выращивать еду', icon: '🌾' },
+            { title: 'Военный', desc: 'Обучен защите', icon: '🎖️' },
+            { title: 'Учёный', desc: 'Может исследовать', icon: '🔬' },
+            { title: 'Повар', desc: 'Готовит еду', icon: '👨‍🍳' },
+            { title: 'Строитель', desc: 'Может строить', icon: '🏗️' },
+            { title: 'Психолог', desc: 'Понимает людей', icon: '🧠' }
+        ];
+
+        const healths = [
+            { title: 'Здоров', desc: 'Отличное состояние', icon: '💪' },
+            { title: 'Простуда', desc: 'Лёгкая простуда', icon: '🤧' },
+            { title: 'Аллергия', desc: 'Аллергия на пыль', icon: '🤧' },
+            { title: 'Близорукость', desc: 'Плохое зрение', icon: '👓' },
+            { title: 'Хромота', desc: 'Прихрамывает', icon: '🦵' }
+        ];
+
+        const hobbies = [
+            { title: 'Шахматы', desc: 'Стратегическое мышление', icon: '♟️' },
+            { title: 'Бег', desc: 'Отличная выносливость', icon: '🏃' },
+            { title: 'Чтение', desc: 'Знания из книг', icon: '📚' },
+            { title: 'Охота', desc: 'Умеет добывать мясо', icon: '🎯' },
+            { title: 'Рыбалка', desc: 'Может ловить рыбу', icon: '🎣' }
+        ];
+
+        const items = [
+            { title: 'Аптечка', desc: 'Лекарства', icon: '💊' },
+            { title: 'Оружие', desc: 'Пистолет', icon: '🔫' },
+            { title: 'Инструменты', desc: 'Набор инструментов', icon: '🧰' },
+            { title: 'Еда', desc: 'Консервы', icon: '🥫' },
+            { title: 'Вода', desc: 'Запас воды', icon: '💧' }
+        ];
+
+        const secrets = [
+            'Знает о тайном входе',
+            'Видел катастрофу',
+            'Имеет связи',
+            'Знает формулу',
+            'Умеет взламывать'
+        ];
+
+        return {
+            profession: this.randomItem(professions),
+            health: this.randomItem(healths),
+            hobby: this.randomItem(hobbies),
+            item: this.randomItem(items),
+            secret: this.randomItem(secrets),
+            age: Math.floor(Math.random() * 40) + 20,
+            gender: Math.random() > 0.5 ? 'Мужчина' : 'Женщина',
+            ability: 'Один раз отменить голос против себя'
+        };
+    }
+
+    randomItem(arr) {
+        return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    handleGameUpdate() {
+        if (!this.gameState) return;
+
+        const phase = this.gameState.phase;
+        const round = this.gameState.round;
+
+        document.getElementById('currentPhase').textContent = this.getPhaseName(phase);
+        document.getElementById('roundNumber').textContent = round;
+        document.getElementById('roundDescription').textContent = this.getRoundDescription(round);
+
+        if (this.gameState.cards && this.gameState.cards[this.playerId]) {
+            this.renderMyCards();
+        }
+
+        this.renderOtherPlayers();
+
+        if (phase === 'reveal') {
+            document.getElementById('revealBtn').style.display = 'inline-block';
+            document.getElementById('readyBtn').style.display = 'none';
+        } else if (phase === 'discussion') {
+            document.getElementById('revealBtn').style.display = 'none';
+            document.getElementById('readyBtn').style.display = 'inline-block';
+            this.startTimer(180);
+        } else if (phase === 'voting') {
+            document.getElementById('revealBtn').style.display = 'none';
+            document.getElementById('readyBtn').style.display = 'none';
+            this.showVoting();
+        }
+
+        if (this.checkGameEnd()) {
+            this.endGame();
+        }
+    }
+
+    getPhaseName(phase) {
+        const names = {
+            'reveal': 'Открытие',
+            'discussion': 'Обсуждение',
+            'voting': 'Голосование'
+        };
+        return names[phase] || phase;
+    }
+
+    getRoundDescription(round) {
+        const descriptions = {
+            1: 'Открытие профессий',
+            2: 'Открытие здоровья',
+            3: 'Открытие хобби',
+            4: 'Открытие багажа',
+            5: 'Финальное голосование'
+        };
+        return descriptions[round] || 'Голосование';
+    }
+
+    renderMyCards() {
+        const cards = this.gameState.cards[this.playerId];
+        const revealed = this.gameState.revealedCards[this.playerId] || [];
+        const container = document.getElementById('playerCards');
+
+        const cardTypes = [
+            { key: 'profession', label: 'Профессия' },
+            { key: 'health', label: 'Здоровье' },
+            { key: 'hobby', label: 'Хобби' },
+            { key: 'item', label: 'Багаж' },
+            { key: 'secret', label: 'Секрет', isSecret: true }
+        ];
+
+        container.innerHTML = cardTypes.map(type => {
+            const isRevealed = revealed.includes(type.key);
+            const card = cards[type.key];
+            
+            if (type.isSecret) {
+                return `
+                    <div class="game-card revealed">
+                        <div class="card-badge">🔒 СЕКРЕТ</div>
+                        <div class="card-title">Тайна</div>
+                        <div class="card-secret">${cards.secret}</div>
+                        <div style="margin-top: 12px; font-size: 0.85rem; color: var(--text-muted);">
+                            Способность: ${cards.ability}
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="game-card ${isRevealed ? 'revealed' : 'hidden'}" onclick="game.revealCard('${type.key}')">
+                    <div class="card-badge">${isRevealed ? card.icon : '❓'} ${type.label.toUpperCase()}</div>
+                    <div class="card-content">
+                        <div class="card-title">${isRevealed ? card.title : 'СКРЫТО'}</div>
+                        <div class="card-description">${isRevealed ? card.desc : 'Нажмите, чтобы открыть'}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderOtherPlayers() {
+        const players = Object.values(this.players || {});
+        const container = document.getElementById('otherPlayersGrid');
+        
+        container.innerHTML = players
+            .filter(p => p.id !== this.playerId && p.isAlive)
+            .map(player => {
+                const revealed = this.gameState.revealedCards[player.id] || [];
+                const cards = this.gameState.cards[player.id];
+                const lastRevealed = revealed[revealed.length - 1];
+                
+                return `
+                    <div class="player-item">
+                        <div class="player-avatar" style="background: ${player.avatar.color};">
+                            ${player.avatar.letter}
+                        </div>
+                        <div class="player-name">${player.name}</div>
+                        <div style="margin-top: 8px; font-size: 0.85rem;">
+                            ${lastRevealed ? `
+                                <div style="color: var(--accent);">${cards[lastRevealed].icon} ${cards[lastRevealed].title}</div>
+                            ` : '<span style="color: var(--text-muted);">...</span>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+    }
+
+    revealCard(cardType) {
+        if (this.gameState.phase !== 'reveal') return;
+        
+        const revealed = this.gameState.revealedCards[this.playerId] || [];
+        if (!revealed.includes(cardType)) {
+            revealed.push(cardType);
+            this.gameState.revealedCards[this.playerId] = revealed;
+            
+            this.broadcast({
+                type: 'reveal',
+                revealedCards: this.gameState.revealedCards
+            });
+            
+            this.renderMyCards();
+            this.checkAllRevealed();
+        }
+    }
+
+    checkAllRevealed() {
+        const players = Object.values(this.players);
+        const alivePlayers = players.filter(p => p.isAlive);
+        const revealed = this.gameState.revealedCards;
+        
+        const round = this.gameState.round;
+        const cardTypes = ['profession', 'health', 'hobby', 'item'];
+        const requiredCard = cardTypes[round - 1];
+
+        const allRevealed = alivePlayers.every(p => {
+            const playerRevealed = revealed[p.id] || [];
+            return playerRevealed.includes(requiredCard);
+        });
+
+        if (allRevealed && this.isHost) {
+            setTimeout(() => {
+                this.gameState.phase = 'discussion';
+                this.broadcast({
+                    type: 'update',
+                    gameState: this.gameState
+                });
+                this.handleGameUpdate();
+            }, 2000);
+        }
+    }
+
+    readyForNext() {
+        this.players[this.playerId].isReady = true;
+        
+        if (this.isHost) {
+            this.checkAllReady();
+        } else {
+            this.broadcast({
+                type: 'update',
+                gameState: this.gameState
+            });
+        }
+    }
+
+    checkAllReady() {
+        const alivePlayers = Object.values(this.players).filter(p => p.isAlive);
+        const allReady = alivePlayers.every(p => p.isReady);
+        
+        if (allReady) {
+            alivePlayers.forEach(p => p.isReady = false);
+            this.gameState.phase = 'voting';
+            this.broadcast({
+                type: 'update',
+                gameState: this.gameState
+            });
+            this.handleGameUpdate();
+        }
+    }
+
+    showVoting() {
+        const players = Object.values(this.players);
+        const alivePlayers = players.filter(p => p.isAlive && p.id !== this.playerId);
+        const container = document.getElementById('votingGrid');
+        
+        document.getElementById('votingSection').style.display = 'block';
+        
+        container.innerHTML = alivePlayers.map(player => `
+            <div class="vote-card" onclick="game.selectVote('${player.id}')" id="vote_${player.id}">
+                <div class="player-avatar" style="background: ${player.avatar.color}; width: 48px; height: 48px; margin: 0 auto 12px;">
+                    ${player.avatar.letter}
+                </div>
+                <div class="player-name">${player.name}</div>
             </div>
-        </div>
-    </div>
+        `).join('');
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>'''
+        this.startTimer(60);
+    }
 
-with open('/mnt/kimi/output/bunker-game/index.html', 'w', encoding='utf-8') as f:
-    f.write(html_v2)
+    selectVote(playerId) {
+        document.querySelectorAll('.vote-card').forEach(el => el.classList.remove('selected'));
+        document.getElementById('vote_' + playerId).classList.add('selected');
+        this.selectedVote = playerId;
+    }
 
-print("✅ Новый дизайн создан!")
-print("📊 Размер HTML: {:,} bytes".format(len(html_v2)))
+    submitVote() {
+        if (!this.selectedVote) {
+            this.showModal('Ошибка', 'Выберите игрока');
+            return;
+        }
+
+        if (this.isHost) {
+            if (!this.gameState.votes) this.gameState.votes = {};
+            this.gameState.votes[this.playerId] = this.selectedVote;
+            this.checkAllVoted();
+        } else {
+            this.broadcast({
+                type: 'vote',
+                playerId: this.playerId,
+                vote: this.selectedVote
+            });
+            document.getElementById('submitVoteBtn').textContent = 'Голос отправлен';
+            document.getElementById('submitVoteBtn').disabled = true;
+        }
+    }
+
+    checkAllVoted() {
+        const alivePlayers = Object.values(this.players).filter(p => p.isAlive);
+        const votes = this.gameState.votes || {};
+        
+        if (Object.keys(votes).length >= alivePlayers.length) {
+            this.processVotes(votes);
+        }
+    }
+
+    processVotes(votes) {
+        const voteCounts = {};
+        Object.values(votes).forEach(votedId => {
+            voteCounts[votedId] = (voteCounts[votedId] || 0) + 1;
+        });
+
+        let maxVotes = 0;
+        let eliminated = null;
+        
+        Object.entries(voteCounts).forEach(([playerId, count]) => {
+            if (count > maxVotes) {
+                maxVotes = count;
+                eliminated = playerId;
+            }
+        });
+
+        if (eliminated) {
+            this.players[eliminated].isAlive = false;
+            
+            if (!this.gameState.eliminated) this.gameState.eliminated = {};
+            this.gameState.eliminated[eliminated] = {
+                playerId: eliminated,
+                playerName: this.players[eliminated].name,
+                votes: maxVotes,
+                round: this.gameState.round
+            };
+
+            const aliveCount = Object.values(this.players).filter(p => p.isAlive).length;
+            
+            if (aliveCount <= 2 || this.gameState.round >= 5) {
+                this.gameState.status = 'ended';
+                this.broadcast({
+                    type: 'update',
+                    gameState: this.gameState
+                });
+                this.endGame();
+            } else {
+                this.gameState.round++;
+                this.gameState.phase = 'reveal';
+                this.gameState.votes = {};
+                this.broadcast({
+                    type: 'update',
+                    gameState: this.gameState
+                });
+                this.handleGameUpdate();
+            }
+        }
+    }
+
+    checkGameEnd() {
+        if (this.gameState.status === 'ended') return true;
+        const alive = Object.values(this.players).filter(p => p.isAlive);
+        return alive.length <= 2 || this.gameState.round > 5;
+    }
+
+    endGame() {
+        this.showScreen('resultsScreen');
+        
+        const survivors = Object.values(this.players).filter(p => p.isAlive);
+        const eliminated = this.gameState.eliminated || {};
+        
+        let html = `
+            <div style="margin-bottom: 32px;">
+                <h3 style="color: var(--success); font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;">🏆 ВЫЖИВШИЕ</h3>
+                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+                    ${survivors.map(p => `
+                        <div class="player-item" style="border-color: var(--success);">
+                            <div class="player-avatar" style="background: ${p.avatar.color};">${p.avatar.letter}</div>
+                            <div class="player-name">${p.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        if (Object.keys(eliminated).length > 0) {
+            html += `
+                <div>
+                    <h3 style="color: var(--danger); font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;">💀 ИСКЛЮЧЁННЫЕ</h3>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;">
+                        ${Object.values(eliminated).map(e => `
+                            <div class="player-item" style="opacity: 0.6; border-color: var(--danger);">
+                                <div class="player-name">${e.playerName}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">Раунд ${e.round} • ${e.votes} голосов</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('resultsContent').innerHTML = html;
+    }
+
+    startTimer(seconds) {
+        clearInterval(this.timerInterval);
+        
+        const timerEl = document.getElementById('gameTimer');
+        const container = document.getElementById('timerContainer');
+        container.style.display = 'flex';
+        
+        let remaining = seconds;
+        
+        this.timerInterval = setInterval(() => {
+            remaining--;
+            
+            const mins = Math.floor(remaining / 60);
+            const secs = remaining % 60;
+            timerEl.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            
+            if (remaining <= 30) timerEl.className = 'timer warning';
+            if (remaining <= 10) timerEl.className = 'timer danger';
+            
+            if (remaining <= 0) {
+                clearInterval(this.timerInterval);
+                container.style.display = 'none';
+            }
+        }, 1000);
+    }
+
+    sendMessage() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        
+        if (!text) return;
+        
+        const message = {
+            author: this.playerName,
+            text: text,
+            timestamp: Date.now()
+        };
+        
+        this.displayMessage(message);
+        
+        this.broadcast({
+            type: 'message',
+            message: message
+        });
+        
+        input.value = '';
+    }
+
+    displayMessage(msg) {
+        const container = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.className = 'chat-message';
+        div.innerHTML = `
+            <div class="author">${msg.author}</div>
+            <div>${msg.text}</div>
+        `;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    leaveRoom() {
+        if (this.peer) {
+            this.peer.destroy();
+        }
+        this.returnToMenu();
+    }
+
+    returnToMenu() {
+        clearInterval(this.timerInterval);
+        this.roomId = null;
+        this.playerId = null;
+        this.isHost = false;
+        this.gameState = null;
+        this.players = {};
+        this.connections = {};
+        this.selectedVote = null;
+        
+        if (this.peer) {
+            this.peer.destroy();
+            this.peer = null;
+        }
+        
+        document.getElementById('chatContainer').style.display = 'none';
+        document.getElementById('timerContainer').style.display = 'none';
+        document.getElementById('votingSection').style.display = 'none';
+        document.getElementById('revealBtn').style.display = 'none';
+        document.getElementById('readyBtn').style.display = 'none';
+        
+        document.getElementById('createPlayerName').value = '';
+        document.getElementById('joinPlayerName').value = '';
+        document.getElementById('roomCodeInput').value = '';
+        
+        // Убираем параметры URL
+        window.history.replaceState({}, '', window.location.pathname);
+        
+        this.showScreen('mainMenu');
+    }
+
+    showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        this.currentScreen = screenId;
+    }
+
+    showModal(title, text) {
+        document.getElementById('modalTitle').textContent = title;
+        document.getElementById('modalText').textContent = text;
+        document.getElementById('modal').classList.add('active');
+    }
+
+    closeModal() {
+        document.getElementById('modal').classList.remove('active');
+    }
+
+    showRules() {
+        document.getElementById('rulesModal').classList.add('active');
+    }
+
+    closeRules() {
+        document.getElementById('rulesModal').classList.remove('active');
+    }
+
+    toggleChat() {
+        const chat = document.getElementById('chatContainer');
+        chat.style.height = chat.style.height === '50px' ? '400px' : '50px';
+    }
+}
+
+// Initialize
+const game = new BunkerGame();
+
+// Global functions
+function showScreen(screenId) { game.showScreen(screenId); }
+function createGame() { game.createGame(); }
+function joinGame() { game.joinGame(); }
+function startGame() { game.startGame(); }
+function leaveRoom() { game.leaveRoom(); }
+function revealCard() { game.revealCard(); }
+function readyForNext() { game.readyForNext(); }
+function submitVote() { game.submitVote(); }
+function sendMessage() { game.sendMessage(); }
+function closeModal() { game.closeModal(); }
+function showRules() { game.showRules(); }
+function closeRules() { game.closeRules(); }
+function returnToMenu() { game.returnToMenu(); }
+function toggleChat() { game.toggleChat(); }
+'''
+
+with open('/mnt/kimi/output/bunker-game/app.js', 'w', encoding='utf-8') as f:
+    f.write(app_js_free)
+
+print("✅ Новая версия без Firebase создана!")
+print("📊 Размер: {:,} bytes".format(len(app_js_free)))
